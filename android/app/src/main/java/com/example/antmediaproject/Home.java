@@ -2,14 +2,9 @@ package com.example.antmediaproject;
 
 import android.os.Bundle;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import android.view.View;
-import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.hardware.Camera;
@@ -17,14 +12,12 @@ import android.hardware.Camera.PreviewCallback;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -51,12 +44,12 @@ public class Home extends AppCompatActivity implements OnClickListener{
     private final static String LOG_TAG = CLASS_LABEL;
 
     /* This isn't a live RTMP endpoint. You should replace this line with your own! */
-    private String ffmpeg_link = "rtmp://live.mux.com/app/YOUR_STREAM_KEY";
+    private String ffmpeg_link = " ";
 
     long startTime = 0;
     boolean recording = false;
 
-    private FFmpegFrameRecorder recorder;
+    private FFmpegFrameRecorder broadcaster;
 
     private boolean isPreviewOn = false;
 
@@ -146,7 +139,7 @@ public class Home extends AppCompatActivity implements OnClickListener{
 
         /* add control button: start and stop */
         btnRecorderControl = (Button) findViewById(R.id.recorder_control);
-        btnRecorderControl.setText("Start");
+        btnRecorderControl.setText("Start Streaming");
         btnRecorderControl.setOnClickListener(this);
 
         /* add camera view */
@@ -174,9 +167,9 @@ public class Home extends AppCompatActivity implements OnClickListener{
     //---------------------------------------
     // initialize ffmpeg_recorder
     //---------------------------------------
-    private void initRecorder() {
+    private void initBroadcaster() {
 
-        Log.w(LOG_TAG,"init recorder");
+        Log.w(LOG_TAG,"init streaming");
 
         if (RECORD_LENGTH > 0) {
             imagesIndex = 0;
@@ -192,11 +185,11 @@ public class Home extends AppCompatActivity implements OnClickListener{
         }
 
         Log.i(LOG_TAG, "ffmpeg_url: " + ffmpeg_link);
-        recorder = new FFmpegFrameRecorder(ffmpeg_link, imageWidth, imageHeight, 1);
-        recorder.setFormat("flv");
-        recorder.setSampleRate(sampleAudioRateInHz);
+        broadcaster = new FFmpegFrameRecorder(ffmpeg_link, imageWidth, imageHeight, 2);
+        broadcaster.setFormat("flv");
+        broadcaster.setSampleRate(sampleAudioRateInHz);
         // Set in the surface changed method
-        recorder.setFrameRate(frameRate);
+        broadcaster.setFrameRate(frameRate);
 
         // The filterString  is any ffmpeg filter.
         // Here is the link for a list: https://ffmpeg.org/ffmpeg-filters.html
@@ -206,19 +199,19 @@ public class Home extends AppCompatActivity implements OnClickListener{
         //default format on android
         filter.setPixelFormat(avutil.AV_PIX_FMT_NV21);
 
-        Log.i(LOG_TAG, "recorder initialize success");
+        Log.i(LOG_TAG, "streaming initialize success");
 
         audioRecordRunnable = new AudioRecordRunnable();
         audioThread = new Thread(audioRecordRunnable);
         runAudioThread = true;
     }
 
-    public void startRecording() {
+    public void startStreaming() {
 
-        initRecorder();
+        initBroadcaster();
 
         try {
-            recorder.start();
+            broadcaster.start();
             startTime = System.currentTimeMillis();
             recording = true;
             audioThread.start();
@@ -232,7 +225,7 @@ public class Home extends AppCompatActivity implements OnClickListener{
         }
     }
 
-    public void stopRecording() {
+    public void stopStreaming() {
 
         runAudioThread = false;
         try {
@@ -245,7 +238,7 @@ public class Home extends AppCompatActivity implements OnClickListener{
         audioRecordRunnable = null;
         audioThread = null;
 
-        if (recorder != null && recording) {
+        if (broadcaster != null && recording) {
             if (RECORD_LENGTH > 0) {
                 Log.v(LOG_TAG,"Writing frames");
                 try {
@@ -264,10 +257,10 @@ public class Home extends AppCompatActivity implements OnClickListener{
                     for (int i = firstIndex; i <= lastIndex; i++) {
                         long t = timestamps[i % timestamps.length] - startTime;
                         if (t >= 0) {
-                            if (t > recorder.getTimestamp()) {
-                                recorder.setTimestamp(t);
+                            if (t > broadcaster.getTimestamp()) {
+                                broadcaster.setTimestamp(t);
                             }
-                            recorder.record(images[i % images.length]);
+                            broadcaster.record(images[i % images.length]);
                         }
                     }
 
@@ -281,7 +274,7 @@ public class Home extends AppCompatActivity implements OnClickListener{
                         lastIndex += samples.length;
                     }
                     for (int i = firstIndex; i <= lastIndex; i++) {
-                        recorder.recordSamples(samples[i % samples.length]);
+                        broadcaster.recordSamples(samples[i % samples.length]);
                     }
                 } catch (FFmpegFrameRecorder.Exception e) {
                     Log.v(LOG_TAG,e.getMessage());
@@ -290,16 +283,16 @@ public class Home extends AppCompatActivity implements OnClickListener{
             }
 
             recording = false;
-            Log.v(LOG_TAG,"Finishing recording, calling stop and release on recorder");
+            Log.v(LOG_TAG,"Finishing streaming, calling stop and release on broadcaster");
             try {
-                recorder.stop();
-                recorder.release();
+                broadcaster.stop();
+                broadcaster.release();
                 filter.stop();
                 filter.release();
             } catch (FFmpegFrameRecorder.Exception | FrameFilter.Exception e) {
                 e.printStackTrace();
             }
-            recorder = null;
+            broadcaster = null;
 
         }
     }
@@ -309,7 +302,7 @@ public class Home extends AppCompatActivity implements OnClickListener{
 
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (recording) {
-                stopRecording();
+                stopStreaming();
             }
 
             finish();
@@ -350,7 +343,7 @@ public class Home extends AppCompatActivity implements OnClickListener{
                 audioData = ShortBuffer.allocate(bufferSize);
             }
 
-            Log.d(LOG_TAG, "audioRecord.startRecording()");
+            Log.d(LOG_TAG, "audioRecord.startStreaming()");
             audioRecord.startRecording();
 
             /* ffmpeg_audio encoding loop */
@@ -368,7 +361,7 @@ public class Home extends AppCompatActivity implements OnClickListener{
                     // Why?  Good question...
                     if (recording) {
                         if (RECORD_LENGTH <= 0) try {
-                            recorder.recordSamples(audioData);
+                            broadcaster.recordSamples(audioData);
                             //Log.v(LOG_TAG,"recording " + 1024*i + " to " + 1024*i+1024);
                         } catch (FFmpegFrameRecorder.Exception e) {
                             Log.v(LOG_TAG,e.getMessage());
@@ -379,7 +372,7 @@ public class Home extends AppCompatActivity implements OnClickListener{
             }
             Log.v(LOG_TAG,"AudioThread Finished, release audioRecord");
 
-            /* encoding finish, release recorder */
+            /* encoding finish, release broadcaster */
             if (audioRecord != null) {
                 audioRecord.stop();
                 audioRecord.release();
@@ -504,18 +497,18 @@ public class Home extends AppCompatActivity implements OnClickListener{
                 if (RECORD_LENGTH <= 0) try {
                     Log.v(LOG_TAG,"Writing Frame");
                     long t = 1000 * (System.currentTimeMillis() - startTime);
-                    if (t > recorder.getTimestamp()) {
-                        recorder.setTimestamp(t);
+                    if (t > broadcaster.getTimestamp()) {
+                        broadcaster.setTimestamp(t);
                     }
 
                     if(addFilter) {
                         filter.push(yuvImage);
                         Frame frame2;
                         while ((frame2 = filter.pull()) != null) {
-                            recorder.record(frame2, filter.getPixelFormat());
+                            broadcaster.record(frame2, filter.getPixelFormat());
                         }
                     } else {
-                        recorder.record(yuvImage);
+                        broadcaster.record(yuvImage);
                     }
                 } catch (FFmpegFrameRecorder.Exception | FrameFilter.Exception e) {
                     Log.v(LOG_TAG,e.getMessage());
@@ -528,14 +521,14 @@ public class Home extends AppCompatActivity implements OnClickListener{
     @Override
     public void onClick(View v) {
         if (!recording) {
-            startRecording();
+            startStreaming();
             Log.w(LOG_TAG, "Start Button Pushed");
-            btnRecorderControl.setText("Stop");
+            btnRecorderControl.setText("Stop Streaming");
         } else {
             // This will trigger the audio recording loop to stop and then set isRecorderStart = false;
-            stopRecording();
+            stopStreaming();
             Log.w(LOG_TAG, "Stop Button Pushed");
-            btnRecorderControl.setText("Start");
+            btnRecorderControl.setText("Start Streaming");
         }
     }
 }

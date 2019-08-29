@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">AntMediaProject</string>
     <string name="title_activity_home">Home</string>
+    <string name="start_streaming">Start Streaming</string>
 </resources>
