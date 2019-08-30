@@ -96,7 +96,7 @@ input {
 	<script type='text/javascript' src='https://github.com/studease/playease/releases/download/v2.0.x/playease.min.js'></script>
 </head>
 <body ontouchstart=''>
-	<div id='playwrap' style='margin: 40px auto 0; width: 100%; max-width: 640px; top: 0; left: 0;'>
+	<div id='playwrap' style='margin: 40px auto 0; width: 100%; height: 100%; top: 0; left: 0;'>
 		<div id='player'></div>
 	</div>
 	<div class='input-container' style='width: 100%; max-width: 640px;'>
