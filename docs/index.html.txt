@@ -125,11 +125,11 @@ input {
 			aspectratio: '16:9',
 			//file: 'rtmp://127.0.0.1/live/sample',
 			file: 'rtmp://13.82.31.161/LiveApp/667932910635541363246111',
-			sources: [{
-				file: 'rtmp://13.82.31.161/LiveApp/667932910635541363246111',
-				type: 'flash',
-				label: 'RTMP-STREAM'
-			}]
+			// sources: [{
+			// 	file: 'rtmp://13.82.31.161/LiveApp/667932910635541363246111',
+			// 	type: 'flash',
+			// 	label: 'RTMP-STREAM'
+			// }]
 			/* {
 				file: 'http://127.0.0.1/live/_definst_/sample',
 				type: 'fmp4',
