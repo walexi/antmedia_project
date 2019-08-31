@@ -114,7 +114,7 @@ input {
 		
 		var width = pw.clientWidth;
 		var height = width * 9 / 16 + 40;
-		
+		// <iframe width="560" height="315" src="//13.82.31.161:5080/LiveApp/play.html?name=667932910635541363246111" frameborder="0" allowfullscreen></iframe>
 		var events = playease.events;
 		var player = playease('player');
 		player.addEventListener(events.PLAYEASE_FULLPAGE, onFullpage);
@@ -125,11 +125,12 @@ input {
 			aspectratio: '16:9',
 			//file: 'rtmp://127.0.0.1/live/sample',
 			file: 'http://127.0.0.1/flv/sample.flv',
-			/*sources: [{
-				file: 'http://127.0.0.1/live/_definst_/sample.flv',
-				type: 'flv',
-				label: 'HTTP-FLV'
-			}, {
+			sources: [{
+				file: 'rtmp://13.82.31.161:5080/LiveApp',
+				type: 'flash',
+				label: 'RTMP-STREAM'
+			}]
+			/* {
 				file: 'http://127.0.0.1/live/_definst_/sample',
 				type: 'fmp4',
 				label: 'HTTP-FMP4'
