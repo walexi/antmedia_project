@@ -124,7 +124,7 @@ input {
 			height: height,
 			aspectratio: '16:9',
 			//file: 'rtmp://127.0.0.1/live/sample',
-			file: 'http://127.0.0.1/flv/sample.flv',
+			file: 'rtmp://13.82.31.161/LiveApp/667932910635541363246111',
 			sources: [{
 				file: 'rtmp://13.82.31.161/LiveApp/667932910635541363246111',
 				type: 'flash',
