@@ -44,7 +44,7 @@ public class Home extends AppCompatActivity implements OnClickListener{
     private final static String LOG_TAG = CLASS_LABEL;
 
     /* This isn't a live RTMP endpoint. You should replace this line with your own! */
-    private String ffmpeg_link = " ";
+    private String ffmpeg_link = "rtmp://13.82.31.161/LiveApp/667932910635541363246111";
 
     long startTime = 0;
     boolean recording = false;
